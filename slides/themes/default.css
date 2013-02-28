@@ -18,6 +18,10 @@ body {
   pointer-events: none;	/* Fix Body Click */
 }
 
+img {
+  height: 40px;
+}
+
 .step {
   width: 1060px;
   padding: 40px 0;
@@ -173,6 +177,16 @@ span,strong {
 
 code span {
   display: inline;
+}
+
+code {
+  font-size: 20px;
+  line-height: 22px;
+}
+
+code.Java {
+  font-size: 10px;
+  line-height: 12px;
 }
 
 .present .positioning {
