@@ -1,5 +1,7 @@
 package org.myorg;
 
+// Downloaded from http://wiki.apache.org/hadoop/WordCount
+
 import java.io.IOException;
 import java.util.*;
 
