@@ -1,0 +1,13 @@
+; Downloaded from http://www.facebook.com/note.php?note_id=89508453919
+
+; Note that you need to provide the tokenizer_script and count_script
+; They can be in pretty much any language.
+
+CREATE TABLE docs(contents STRING);
+FROM 
+
+(MAP docs.contents USING 'tokenizer_script' AS word, cnt
+ FROM docs
+ CLUSTER BY word) map_output
+
+REDUCE map_output.word, map_output.cnt USING 'count_script' AS word, cnt;
