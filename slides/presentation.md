@@ -125,7 +125,7 @@ The power of logic programming and Clojure, combined with a lot of magic
 
 ---
 
-```Clojure
+```
 (ns cascalog-class.core
   (:require [cascalog.api :refer :all]
             [cascalog.ops :as c]))
@@ -173,13 +173,13 @@ The power of logic programming and Clojure, combined with a lot of magic
 
 # Facts/Relations
 
-```Clojure
+```
 (defrel
       person first-name last-name  role)
 (fact person "Dr."      "Horrible" :villain)
 (fact person "Bad"      "Horse"    :villain)
 (fact person "Captain"  "Hammer"   :hero)
-(fact person "Penny"    "???"      :bystander)
+(fact person "Penny"    ""         :bystander)
 ```
 
 ---
@@ -196,7 +196,7 @@ The power of logic programming and Clojure, combined with a lot of magic
 # Logic Variables
 ## For Non-Physicists
 
-```Clojure
+```
 (defrel person name)
 (fact person "Dr. Horrible")
 (fact person "Penny")
@@ -213,7 +213,7 @@ The power of logic programming and Clojure, combined with a lot of magic
 
 # Predicates
 
-```Clojure
+```
 (defrel likes liker likee)
 (fact likes "Dr. Horrible" "Penny")
 (fact likes "Penny" "Captain Hammer")
@@ -222,6 +222,7 @@ The power of logic programming and Clojure, combined with a lot of magic
 ;; Who likes Penny?
 (run* [q]
   (likes q "Penny"))
+
 ;; output:
 ("Dr. Horrible")
 
@@ -240,24 +241,119 @@ The power of logic programming and Clojure, combined with a lot of magic
 
 # Cascalog
 
+- (not= core.logic Datalog)
+- Tuple all the things
+
+---
+
+# Cascalog
+
+- Generators - Tuple source
+- Operations - Augment or filter tuples
+- Aggregators - Act on sequences of tuples
+
 ---
 
 # Generators
+Vector source:
+
+```
+(def people [
+ [ "Dr."      "Horrible" :villain   ]
+ [ "Bad"      "Horse"    :villain   ]
+ [ "Captain"  "Hammer"   :hero      ]
+ [ "Penny"    ""         :bystander ]])
+```
+
+TSV source:
+
+```
+Dr.     Horrible villain
+Bad     Horse    villain
+Captain Hammer   hero
+Penny            bystander
+```
+
+```
+(defn split
+  [^String sentence]
+  (.split sentence "\\t"))
+
+(def people
+  (<- [?fname ?lname ?role]
+    (lfs-textline "people.tsv" ?line)
+    (split ?line :> ?fname ?lname ?role)))
+```
 
 ---
 
 # Operations
 
+```
+(def people [
+ ["Dr."      "Horrible" :villain  ]
+ ["Bad"      "Horse"    :villain  ]
+ ["Captain"  "Hammer"   :hero     ]
+ ["Penny"    ""         :bystander]])
+
+;; Filter:
+(??<- [?fname]
+  (people ?fname ?lname _)
+  (clojure.string/blank? ?lname))
+
+;output
+(["Penny"])
+
+;; Augment
+(defn expand-abbreviations [name]
+  (if (= name "Dr.") "Doctor" name))
+
+(??<- [?fname ?lname]
+  (people ?orig-fname ?lname :villain) ; Filter, only villains
+  (expand-abbreviations ?orig-fname :> ?fname))
+
+;ouput
+(["Doctor" "Horrible"] ["Bad Horse"])
+```
+
 ---
+
+# Joins
+
+```
+(def people [
+ ["Dr."      "Horrible" :villain  ]
+ ["Bad"      "Horse"    :villain  ]
+ ["Captain"  "Hammer"   :hero     ]
+ ["Penny"    ""         :bystander]])
+
+(def likes [
+ ["Dr. Horrible"   "Penny"         ]
+ ["Penny"          "Captain Hammer"]
+ ["Captain Hammer" "Captain Hammer"]])
+
+;; What people are liked by villains?
+(??<- [?name ?liked-person]
+  (people ?name ?role)
+  (likes ?name ?liked-person)
+  (= ?role :villain))
+
+;output
+(["Dr. Horrible" "Penny"])
+```
+
+---
+
 
 # Aggregators
 
 ---
 
 # Simple Sample Application (live demonstrated) one of the following
-- Getting average rating of restaurants by users in an area with certain rating
-- Word counts with some preprocessing?
-- Some kind of similarity clustering (what I do for Factual)
-- ---Add other ideas here if you have them---
+## Some kind of statistics on talk summaries?
+- Most common words
+- Most common words by speaker
+- Most common words for speakers by venue?
+- Venue
 
 [factual-logo]: images/factual-high-res.png "Factual"
