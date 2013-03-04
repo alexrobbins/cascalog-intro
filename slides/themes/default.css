@@ -139,7 +139,7 @@ ul {
 li {
   margin: 10px 0;
   line-height: 50px;
-  list-style: none;
+  /* list-style: none;*/
 }
 
 td,th {
