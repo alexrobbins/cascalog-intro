@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="css/reset.css" rel="stylesheet" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1024" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="shortcut icon" href="css/favicon.png" />
+    <link rel="apple-touch-icon" href="css/apple-touch-icon.png" />
+    <!-- Code Prettifier: -->
+<link href="css/highlight.css" type="text/css" rel="stylesheet" />
+<script type="text/javascript" src="js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+    <link href="css/style.css" rel="stylesheet" />
+<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,800italic,300,400,800' rel='stylesheet' type='text/css'>    
+
+
+  </head>
+
+  <body>
+  <div class="fallback-message">
+  <p>Your browser <b>doesn't support the features required</b> by impress.js, so you are presented with a simplified version of this presentation.</p>
+  <p>For the best experience please use the latest <b>Chrome</b>, <b>Safari</b> or <b>Firefox</b> browser.</p>
+  </div>
+    <div id="impress">
+    <div class='step' >
+    
+<h1>Cascalog</h1>
+
+<h2>Logic Programming Over Hadoop</h2>
+
+<p>Alex Robbins <img src="images/factual-high-res.png" alt="factual-logo" title="Factual"></p>
+</div>
+      <div class='step' >
+    
+<h1>What can Cascalog do for me?</h1>
+</div>
+      <div class='step' >
+    
+<h1>What problem does it solve?</h1>
+</div>
+      <div class='step' >
+    
+<h1>Who solves this problem?</h1>
+</div>
+      <div class='step' >
+    
+<h1>Hadoop</h1>
+
+<p>Perfect for anyone who thinks in Map/Reduce, and likes typing.</p>
+</div>
+      <div class='step' >
+    <pre><code class='prettyprint Java'>package org.myorg;
+
+import java.io.IOException;
+import java.util.*;
+
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.conf.*;
+import org.apache.hadoop.io.*;
+import org.apache.hadoop.mapreduce.*;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+
+public class WordCount {
+
+  public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
+    private final static IntWritable one = new IntWritable(1);
+    private Text word = new Text();
+
+    public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+      String line = value.toString();
+      StringTokenizer tokenizer = new StringTokenizer(line);
+      while (tokenizer.hasMoreTokens()) {
+        word.set(tokenizer.nextToken());
+        context.write(word, one);
+      }
+    }
+  }
+
+  public static class Reduce extends Reducer<Text, IntWritable, Text, IntWritable> {
+
+    public void reduce(Text key, Iterable<IntWritable> values, Context context)
+      throws IOException, InterruptedException {
+      int sum = 0;
+      for (IntWritable val : values) {
+        sum += val.get();
+      }
+      context.write(key, new IntWritable(sum));
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Configuration conf = new Configuration();
+    Job job = new Job(conf, "wordcount");
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(IntWritable.class);
+    job.setMapperClass(Map.class);
+    job.setReducerClass(Reduce.class);
+    job.setInputFormatClass(TextInputFormat.class);
+    job.setOutputFormatClass(TextOutputFormat.class);
+    FileInputFormat.addInputPath(job, new Path(args[0]));
+    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+    job.waitForCompletion(true);
+  }
+
+}
+
+// http://wiki.apache.org/hadoop/WordCount
+</code></pre></div>
+      <div class='step' >
+    
+<h1>Pig</h1>
+
+<p>A great fit for people who love SQL, and wish they could use it for everything.</p>
+</div>
+      <div class='step' >
+    <pre><code class='prettyprint '>input_lines = LOAD '/tmp/my-copy-of-all-pages-on-internet' AS (line:chararray);
+
+-- Extract words from each line and put them into a pig bag
+-- datatype, then flatten the bag to get one word on each row
+words = FOREACH input_lines GENERATE FLATTEN(TOKENIZE(line)) AS word;
+
+-- filter out any words that are just white spaces
+filtered_words = FILTER words BY word MATCHES '\\w+';
+
+-- create a group for each word
+word_groups = GROUP filtered_words BY word;
+
+-- count the entries in each group
+word_count = FOREACH word_groups GENERATE COUNT(filtered_words) AS count, group AS word;
+
+-- order the records by count
+ordered_word_count = ORDER word_count BY count DESC;
+STORE ordered_word_count INTO '/tmp/number-of-words-on-internet';
+
+-- http://en.wikipedia.org/wiki/Pig_(programming_tool)
+</code></pre></div>
+      <div class='step' >
+    
+<h1>Cascalog</h1>
+
+<p>The power of logic programming and Clojure, combined with a lot of magic</p>
+</div>
+      <div class='step' >
+    <pre><code class='prettyprint '>(ns cascalog-class.core
+  (:require [cascalog.api :refer :all]
+            [cascalog.ops :as c]))
+
+(defmapcatop split
+  "Accepts a sentence 1-tuple, splits that sentence on whitespace, and
+  emits a single 1-tuple for each word."
+  [^String sentence]
+  (.split sentence "\\s+"))
+
+(def -main
+  "Accepts a generator of lines of text and returns a subquery that
+  generates a count for each word in the text sample."
+  (?<- (stdout)
+    [?word ?count]
+    ((hfs-textline "input-dir") ?textline)
+    (split ?textline :> ?word)
+    (c/count ?count)))
+
+;; https://github.com/sritchie/cascalog-class/blob/master/src/cascalog_class/core.clj
+</code></pre></div>
+      <div class='step' >
+    
+<h1>What is Cascalog?</h1>
+
+<p><strong>Casca</strong>ding + Data<strong>log</strong> = <strong>Cascalog</strong></p>
+</div>
+      <div class='step' >
+    
+<h1>Cascading?</h1>
+
+<h2>Cascading Wraps Hadoop</h2>
+
+<h2>Cascalog Wraps Cascading</h2>
+</div>
+      <div class='step' >
+    
+<h1>Datalog?</h1>
+</div>
+      <div class='step' >
+    
+<h1>Logic Programming?</h1>
+
+<p>(in core.logic)</p>
+</div>
+      <div class='step' >
+    
+<h1>Facts/Relations</h1>
+<pre><code class='prettyprint '>(defrel
+      person first-name last-name  role)
+(fact person "Dr."      "Horrible" :villain)
+(fact person "Bad"      "Horse"    :villain)
+(fact person "Captain"  "Hammer"   :hero)
+(fact person "Penny"    ""         :bystander)
+</code></pre></div>
+      <div class='step' >
+    
+<h1>Logic Variables</h1>
+
+<h2>For Physicists</h2>
+
+<ul>
+<li>Logic Variables abide by the Quantum Superposition principle</li>
+<li>run* causes (repeated) wave function collapse</li>
+<li>Don&#39;t use classical reasoning in quantum contexts!</li>
+</ul>
+</div>
+      <div class='step' >
+    
+<h1>Logic Variables</h1>
+
+<h2>For Non-Physicists</h2>
+<pre><code class='prettyprint '>(defrel person name)
+(fact person "Dr. Horrible")
+(fact person "Penny")
+(fact person "Captain Hammer")
+
+(run* [variable]
+  (person variable))
+
+;; output:
+("Dr. Horrible" "Penny" "Captain Hammer")
+</code></pre></div>
+      <div class='step' >
+    
+<h1>Predicates</h1>
+<pre><code class='prettyprint '>(defrel likes liker likee)
+(fact likes "Dr. Horrible" "Penny")
+(fact likes "Penny" "Captain Hammer")
+(fact likes "Captain Hammer" "Captain Hammer")
+
+;; Who likes Penny?
+(run* [q]
+  (likes q "Penny"))
+
+;; output:
+("Dr. Horrible")
+
+;; Any pairs that like each other?
+(run* [q]
+  (fresh [x y]
+    (== q [x y])
+    (likes x y)
+    (likes y x)))
+
+;; output:
+()
+</code></pre></div>
+      <div class='step' >
+    
+<h1>Cascalog</h1>
+
+<ul>
+<li>(not= core.logic Datalog)</li>
+<li>Tuple all the things</li>
+</ul>
+</div>
+      <div class='step' >
+    
+<h1>Cascalog</h1>
+
+<ul>
+<li>Generators - Tuple source</li>
+<li>Operations - Augment or filter tuples</li>
+<li>Aggregators - Act on sequences of tuples</li>
+</ul>
+</div>
+      <div class='step' >
+    
+<h1>Generators</h1>
+
+<p>Vector source:</p>
+<pre><code class='prettyprint '>(def people [
+ [ "Dr."      "Horrible" :villain   ]
+ [ "Bad"      "Horse"    :villain   ]
+ [ "Captain"  "Hammer"   :hero      ]
+ [ "Penny"    ""         :bystander ]])
+</code></pre>
+<p>TSV source:</p>
+<pre><code class='prettyprint '>Dr.     Horrible villain
+Bad     Horse    villain
+Captain Hammer   hero
+Penny            bystander
+</code></pre><pre><code class='prettyprint '>(defn split
+  [^String sentence]
+  (.split sentence "\\t"))
+
+(def people
+  (<- [?fname ?lname ?role]
+    (lfs-textline "people.tsv" ?line)
+    (split ?line :> ?fname ?lname ?role)))
+</code></pre></div>
+      <div class='step' >
+    
+<h1>Operations</h1>
+<pre><code class='prettyprint '>(def people [
+ ["Dr."      "Horrible" :villain  ]
+ ["Bad"      "Horse"    :villain  ]
+ ["Captain"  "Hammer"   :hero     ]
+ ["Penny"    ""         :bystander]])
+
+;; Filter:
+(??<- [?fname]
+  (people ?fname ?lname _)
+  (clojure.string/blank? ?lname))
+
+;output
+(["Penny"])
+
+;; Augment
+(defn expand-abbreviations [name]
+  (if (= name "Dr.") "Doctor" name))
+
+(??<- [?fname ?lname]
+  (people ?orig-fname ?lname :villain) ; Filter, only villains
+  (expand-abbreviations ?orig-fname :> ?fname))
+
+;ouput
+(["Doctor" "Horrible"] ["Bad Horse"])
+</code></pre></div>
+      <div class='step' >
+    
+<h1>Joins</h1>
+<pre><code class='prettyprint '>(def people [
+ ["Dr."      "Horrible" :villain  ]
+ ["Bad"      "Horse"    :villain  ]
+ ["Captain"  "Hammer"   :hero     ]
+ ["Penny"    ""         :bystander]])
+
+(def likes [
+ ["Dr. Horrible"   "Penny"         ]
+ ["Penny"          "Captain Hammer"]
+ ["Captain Hammer" "Captain Hammer"]])
+
+(def favorite-foods [
+ ["Penny" "Frozen yogurt"]])
+
+;; What people are liked by villains, and what food do they like?
+(??<- [?liked-person ?food]
+  (people ?liker :villain) ; filtering!
+  (likes ?liker ?liked-person)
+  (favorite-foods ?liked-person ?food))
+
+;output
+(["Penny" "Frozen yogurt"])
+</code></pre>
+<p>Painless join across three sources!</p>
+</div>
+      <div class='step' >
+    
+<h1>Aggregators</h1>
+<pre><code class='prettyprint '>(def people [
+ ["Dr."      "Horrible" :villain  ]
+ ["Bad"      "Horse"    :villain  ]
+ ["Captain"  "Hammer"   :hero     ]
+ ["Penny"    ""         :bystander]])
+
+; How many of each role are there?
+(??<- [?role ?count]
+  (people _ _ ?role)
+  (cascalog.ops/count ?count))
+
+;output
+([:villain 2] [:hero 1] [:bystander 1])
+</code></pre></div>
+      <div class='step' >
+    
+<h1>Demo</h1>
+</div>
+      <div class='step' >
+    
+<h1>Thanks</h1>
+
+<p>Nathan Marz (and others) for Cascalog</p>
+
+<p>Rich Hickie for Clojure</p>
+
+<p>Alex Miller for Clojure/West</p>
+</div>
+      <div class='step' >
+    
+<h1>Cascalog</h1>
+
+<h2>Logic Programming Over Hadoop</h2>
+
+<p>Alex Robbins</p>
+
+<ul>
+<li><a href="mailto:alexander.j.robbins@gmail.com">alexander.j.robbins@gmail.com</a></li>
+<li><a href="mailto:alexr@factual.com">alexr@factual.com</a> <img src="images/factual-high-res.png" alt="factual-logo" title="Factual"></li>
+<li><a href="https://github.com/alexrobbins/cascalog-intro">https://github.com/alexrobbins/cascalog-intro</a></li>
+</ul>
+
+<p>Factual is hiring!</p>
+
+      </div>
+    <script src="js/impress.js"></script>
+    <script>impress().init();</script>
+  </body>
+</html>
+    
