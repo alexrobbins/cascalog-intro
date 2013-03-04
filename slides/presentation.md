@@ -332,15 +332,20 @@ Penny            bystander
  ["Penny"          "Captain Hammer"]
  ["Captain Hammer" "Captain Hammer"]])
 
-;; What people are liked by villains?
-(??<- [?name ?liked-person]
-  (people ?name ?role)
-  (likes ?name ?liked-person)
-  (= ?role :villain))
+(def favorite-foods [
+ ["Penny" "Frozen yogurt"]])
+
+;; What people are liked by villains, and what food do they like?
+(??<- [?liked-person ?food]
+  (people ?liker :villain) ; filtering!
+  (likes ?liker ?liked-person)
+  (favorite-foods ?liked-person ?food))
 
 ;output
-(["Dr. Horrible" "Penny"])
+(["Penny" "Frozen yogurt"])
 ```
+
+Painless join across three sources!
 
 ---
 
