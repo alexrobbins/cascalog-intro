@@ -1,5 +1,5 @@
 # Cascalog
-## Logic Programming Over Hadoop
+# Logic Programming Over Hadoop
 
 Alex Robbins ![factual-logo]
 
@@ -152,46 +152,94 @@ The power of logic programming and Clojure, combined with a lot of magic
 
 # What is Cascalog?
 
-- **Casca**ding + Data**log** = **Cascalog**
+**Casca**ding + Data**log** = **Cascalog**
 
 ---
 
-## Why Cascalog?
-
-
----
-
-# Hadoop
+# Cascading?
+## Cascading Wraps Hadoop
+## Cascalog Wraps Cascading
 
 ---
 
-## Alternatives?
+# Datalog?
 
 ---
 
-## Cascalog strengths
+# Logic Programming?
+(in core.logic)
 
 ---
 
-## What is datalog?
+# Facts/Relations
+
+```Clojure
+(defrel
+      person first-name last-name  role)
+(fact person "Dr."      "Horrible" :villain)
+(fact person "Bad"      "Horse"    :villain)
+(fact person "Captain"  "Hammer"   :hero)
+(fact person "Penny"    "???"      :bystander)
+```
 
 ---
 
-## Intro to Logic Programming
-- facts/relations
-- lvars
-- predicates
+# Logic Variables
+## For Physicists
+
+- Logic Variables abide by the Quantum Superposition principle
+- run* causes wave function collapse
+- Don't use classical reasoning for quantum contexts!
 
 ---
 
-## Cascalog
-- Generators
-- Operations
-- Aggregators
+# Logic Variables
+## For Non-physicists
+
+```Clojure
+(defrel person name)
+(fact person "Dr. Horrible")
+(fact person "Penny")
+(fact person "Captain Hammer")
+
+(run* [variable]
+  (person variable))
+
+;; output:
+("Dr. Horrible" "Penny" "Captain Hammer")
+```
 
 ---
 
-### Simple Sample Application (live demonstrated) one of the following
+# Predicates
+
+```Clojure
+(defrel likes liker likee)
+(fact likes "Dr. Horrible" "Penny")
+(fact likes "Penny" "Dr. Horrible")
+(fact likes "Penny" "Captain Hammer")
+(fact likes "Captain Hammer" "Captain Hammer")
+```
+
+---
+
+# Cascalog
+
+---
+
+# Generators
+
+---
+
+# Operations
+
+---
+
+# Aggregators
+
+---
+
+# Simple Sample Application (live demonstrated) one of the following
 - Getting average rating of restaurants by users in an area with certain rating
 - Word counts with some preprocessing?
 - Some kind of similarity clustering (what I do for Factual)
