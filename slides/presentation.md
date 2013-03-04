@@ -373,7 +373,18 @@ Painless join across three sources!
 
 ---
 
-# Thanks!
+# Thanks
+
+Nathan Marz (and others) for Cascalog
+
+Rich Hickie for Clojure
+
+Alex Miller for Clojure/West
+
+---
+
+# Cascalog
+## Logic Programming Over Hadoop
 
 Alex Robbins
 
