@@ -188,7 +188,7 @@ The power of logic programming and Clojure, combined with a lot of magic
 ## For Physicists
 
 - Logic Variables abide by the Quantum Superposition principle
-- run* causes (repeated) wave function collapse
+- run* causes (repeated) wave function collapses
 - Don't use classical reasoning in quantum contexts!
 
 ---
