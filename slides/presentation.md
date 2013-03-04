@@ -1,5 +1,5 @@
 # Cascalog
-# Logic Programming Over Hadoop
+## Logic Programming Over Hadoop
 
 Alex Robbins ![factual-logo]
 
@@ -188,13 +188,13 @@ The power of logic programming and Clojure, combined with a lot of magic
 ## For Physicists
 
 - Logic Variables abide by the Quantum Superposition principle
-- run* causes wave function collapse
-- Don't use classical reasoning for quantum contexts!
+- run* causes (repeated) wave function collapse
+- Don't use classical reasoning in quantum contexts!
 
 ---
 
 # Logic Variables
-## For Non-physicists
+## For Non-Physicists
 
 ```Clojure
 (defrel person name)
@@ -216,9 +216,24 @@ The power of logic programming and Clojure, combined with a lot of magic
 ```Clojure
 (defrel likes liker likee)
 (fact likes "Dr. Horrible" "Penny")
-(fact likes "Penny" "Dr. Horrible")
 (fact likes "Penny" "Captain Hammer")
 (fact likes "Captain Hammer" "Captain Hammer")
+
+;; Who likes Penny?
+(run* [q]
+  (likes q "Penny"))
+;; output:
+("Dr. Horrible")
+
+;; Any pairs that like each other?
+(run* [q]
+  (fresh [x y]
+    (== q [x y])
+    (likes x y)
+    (likes y x)))
+
+;; output:
+()
 ```
 
 ---
