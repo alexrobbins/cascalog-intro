@@ -349,16 +349,38 @@ Painless join across three sources!
 
 ---
 
-
 # Aggregators
+
+```
+(def people [
+ ["Dr."      "Horrible" :villain  ]
+ ["Bad"      "Horse"    :villain  ]
+ ["Captain"  "Hammer"   :hero     ]
+ ["Penny"    ""         :bystander]])
+
+; How many of each role are there?
+(??<- [?role ?count]
+  (people _ _ ?role)
+  (cascalog.ops/count ?count))
+
+;output
+([:villain 2] [:hero 1] [:bystander 1])
+```
 
 ---
 
-# Simple Sample Application (live demonstrated) one of the following
-## Some kind of statistics on talk summaries?
-- Most common words
-- Most common words by speaker
-- Most common words for speakers by venue?
-- Venue
+# Demo
+
+---
+
+# Thanks!
+
+Alex Robbins
+
+- alexander.j.robbins@gmail.com
+- alexr@factual.com ![factual-logo]
+- https://github.com/alexrobbins/cascalog-intro
+
+Factual is hiring!
 
 [factual-logo]: images/factual-high-res.png "Factual"
