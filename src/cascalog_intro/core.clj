@@ -45,7 +45,7 @@
   )
 
 ;; Oops, lowercase everything
-(defn lowercase [^String string]
+(defn lowercase [string]
   (.toLowerCase string))
 
 (comment
