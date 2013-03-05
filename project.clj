@@ -5,4 +5,6 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [org.clojure/tools.cli "0.2.2"]
-                 [enlive "1.1.1"]])
+                 [enlive "1.1.1"]
+                 [cascalog "1.10.0"]
+                 [org.apache.hadoop/hadoop-core "0.20.2-dev"]])
