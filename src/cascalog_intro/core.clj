@@ -8,6 +8,26 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ;; Let's start with word counts for one talk, just to get started
 
 ;; First we need a tuple source.
@@ -31,6 +51,34 @@
 
   )
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ;; Now we need something to split a description into multiple words
 (defmapcatop description->words [description]
   (re-seq #"[A-Za-z0-9']+" description))
@@ -44,6 +92,30 @@
 
   )
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ;; Oops, lowercase everything
 (defn lowercase [string]
   (.toLowerCase string))
@@ -56,6 +128,28 @@
           (c/count ?count))
 
   )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ;; Top ten words
 (def word-counts-for-a-talk
@@ -73,6 +167,35 @@
         (c/limit [10] ?word ?count :> ?top-word ?top-count))
 
   )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ;; Word counts, separated by talk type
 
@@ -92,6 +215,35 @@
 
   )
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ;; Too many junk words, let's filter those out
 (def not-stopword?
   (complement stopwords))
@@ -105,6 +257,38 @@
         (c/limit [10] ?word ?count :> ?top-word ?top-count))
 
   )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ;; What about theater vs studio?
 
