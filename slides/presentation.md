@@ -121,7 +121,7 @@ STORE ordered_word_count INTO '/tmp/number-of-words-on-internet';
 
 # Cascalog
 
-The power of logic programming and Clojure, combined with a lot of magic
+The power of logic programming and Clojure, combined with a lot of magic.
 
 ---
 
