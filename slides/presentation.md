@@ -1,7 +1,7 @@
 # Cascalog
 ## Logic Programming Over Hadoop
 
-Alex Robbins ![factual-logo]
+Alex Robbins &nbsp;&nbsp;&nbsp;&nbsp; ![factual-logo]
 
 ---
 
@@ -491,8 +491,8 @@ Alex Miller for Clojure/West
 
 Alex Robbins
 
+- alexr@factual.com &nbsp;&nbsp;&nbsp;&nbsp; ![factual-logo]
 - alexander.j.robbins@gmail.com
-- alexr@factual.com ![factual-logo]
 - https://github.com/alexrobbins/cascalog-intro
 
 Factual is hiring!
