@@ -30,25 +30,61 @@
 
 <h2>Logic Programming Over Hadoop</h2>
 
-<p>Alex Robbins <img src="images/factual-high-res.png" alt="factual-logo" title="Factual"></p>
+<p>Alex Robbins &nbsp;&nbsp;&nbsp;&nbsp; <img src="images/factual-high-res.png" alt="factual-logo" title="Factual"></p>
 </div>
       <div class='step' >
     
 <h1>What can Cascalog do for me?</h1>
+
+<!--- Notes:
+This is meant to be a practical talk about Cascalog. Although it is certainly
+some cool tech, we each already have a list of things we'd like to check out
+that is longer than we'll ever get to. It is my hope that this talk will help
+you decide whether or not Cascalog is worth the time it'll take you to
+understand it.
+Being cool isn't enough to earn a spot in most of our busy schedules. It is
+my hope that by the end of this talk, you'll have a better idea of how
+Cascalog can help you accomplish things faster and more easily, all while having
+fun with some cool tech.
+--->
 </div>
       <div class='step' >
     
 <h1>What problem does it solve?</h1>
+
+<!--- Notes:
+Cascalog provides a way to describe and execute distributed computing jobs.
+If you have a task that can be parallelized and is taking too long, Cascalog
+can help. Cascalog allows you to easily break a task down into chunks, and
+pass those chunks around a computing cluster of dozens or hundreds of servers.
+--->
 </div>
       <div class='step' >
     
-<h1>Who solves this problem?</h1>
+<h1>Who else solves this problem?</h1>
+
+<!--- Notes:
+Cascalog is not the only distributed computing framework. Actually, it is built
+on top of one of its biggest competitors, Hadoop. Other packages currently
+solving this problem include Pig, Hive and Riak, among others. The different
+packages embrace different abstractions, as well as different levels of
+abstraction.
+--->
 </div>
       <div class='step' >
     
 <h1>Hadoop</h1>
 
 <p>Perfect for anyone who thinks in Map/Reduce, and likes typing.</p>
+
+<!--- Notes:
+Hadoop is the current dominant force in the world of distributed computing.
+Most of its competitors are built on top of it, and reuse pieces of it, such as
+HDFS, its distributed file system. Hadoop provides low level control over your
+jobs, with the normal tradeoffs for low level programming. Writing compute jobs
+in hadoop requires a fair amount of boilerplate, with even very simple tasks
+taking more than 50 lines of code. At the same time, Hadoop works.
+--->
 </div>
       <div class='step' >
     <pre><code class='prettyprint Java'>package org.myorg;
@@ -116,6 +152,15 @@ public class WordCount {
 <h1>Pig</h1>
 
 <p>A great fit for people who love SQL, and wish they could use it for everything.</p>
+
+<!--- Notes:
+Disclaimer: I've never used Pig myself.
+Pig allows you to write SQL-like commands that are run over the cluster. A
+possible limitation is that Pig is its own programming language, so you can't
+import functionality from third-party packages the way you would in Hadoop (java)
+or Cascalog (Clojure or Java).
+Some people really like it. I haven't used it.
+--->
 </div>
       <div class='step' >
     <pre><code class='prettyprint '>input_lines = LOAD '/tmp/my-copy-of-all-pages-on-internet' AS (line:chararray);
@@ -144,6 +189,13 @@ STORE ordered_word_count INTO '/tmp/number-of-words-on-internet';
 <h1>Cascalog</h1>
 
 <p>The power of logic programming and Clojure, combined with a lot of magic.</p>
+
+<!--- Notes:
+Obviously, we'll be talking about Cascalog for the rest of the talk, so I don't
+want to give it all away now. The high level strengths and weaknesses are:
+Strengths: concise, easily extensible, Clojure!
+Weaknesses: lots of magic, forces a restricted subset of clojure (no lambdas)
+--->
 </div>
       <div class='step' >
     <pre><code class='prettyprint '>(ns cascalog-class.core
@@ -172,6 +224,16 @@ STORE ordered_word_count INTO '/tmp/number-of-words-on-internet';
 <h1>What is Cascalog?</h1>
 
 <p><strong>Casca</strong>ding + Data<strong>log</strong> = <strong>Cascalog</strong></p>
+
+<!--- Notes:
+Unfortunately, over the next several slides I'll be defining terms by using other
+terms that you likely don't know. However, I promise to cover those terms in
+later slides.
+
+In this case, the question is, "What is Cascalog?" The answer is, "Cascalog is a
+combination of Cascading and Datalog." An answer that is technically correct
+(the best kind of correct), but useless to most of you.
+--->
 </div>
       <div class='step' >
     
@@ -180,16 +242,52 @@ STORE ordered_word_count INTO '/tmp/number-of-words-on-internet';
 <h2>Cascading Wraps Hadoop</h2>
 
 <h2>Cascalog Wraps Cascading</h2>
+
+<!--- Notes:
+What is Cascading? Cascading is a Java library that makes it easier to program
+jobs for Hadoop. It takes the Hadoop Map/Reduce idea and layers a data flow
+abstraction on top of it. You create data source called taps, allow the data
+to flow through many different transforms or combinations, and then at the end
+the data flows into a sink. This abstraction can make many Map/Reduce jobs easier
+to program, and has many followers.
+--->
 </div>
       <div class='step' >
     
 <h1>Datalog?</h1>
+
+<!--- Notes:
+Datalog is a logic programming language designed to query data. It is similar to
+Prolog, but with a couple of tweaks to make it better behaved. For instance, all
+Datalog queries are guaranteed to terminate when run on finite datasets. Datalog,
+like most logic programming languages, lets you program declaratively. Instead
+of telling Cascalog how to do things, you tell it what you want at the end, and
+Cascalog figures out how to do it.
+--->
 </div>
       <div class='step' >
     
 <h1>Logic Programming?</h1>
 
 <p>(in core.logic)</p>
+
+<!--- Notes:
+Cascalog may be the first time some of you have actually used logic programming.
+Clojure has a library called core.logic which enables logic programming in
+Clojure. Core.logic and cascalog are not the same, and neither uses the other,
+but they share many of the same concepts. I'll explain the concepts first using
+core.logic, and then in Cascalog so you can see the difference.
+
+Declarative programming can be a difficult transition for many programmers. Years
+of telling the computer exactly what to do have trained you to care about the
+details of how. Declarative programming asks you to relax a little, and trust
+the computer. When it works, it can be a great time saver. When something goes
+wrong, it can be difficult to tell where the problem is.
+
+For each line in the logic program, even if the other variables aren't
+mentioned, they still exist. Filtering or adding an element will affect the entire
+row. Picturing the rest of the members as ghosts over to the side might be helpful.
+--->
 </div>
       <div class='step' >
     
@@ -262,6 +360,11 @@ STORE ordered_word_count INTO '/tmp/number-of-words-on-internet';
 <li>(not= core.logic Datalog)</li>
 <li>Tuple all the things</li>
 </ul>
+
+<!--- Notes:
+Cascalog and core.logic are not the same. Although they both embrace the logic
+programming paradigm, you won't be able to copy code from one to the other.
+--->
 </div>
       <div class='step' >
     
@@ -394,8 +497,8 @@ Penny            bystander
 <p>Alex Robbins</p>
 
 <ul>
+<li><a href="mailto:alexr@factual.com">alexr@factual.com</a> &nbsp;&nbsp;&nbsp;&nbsp; <img src="images/factual-high-res.png" alt="factual-logo" title="Factual"></li>
 <li><a href="mailto:alexander.j.robbins@gmail.com">alexander.j.robbins@gmail.com</a></li>
-<li><a href="mailto:alexr@factual.com">alexr@factual.com</a> <img src="images/factual-high-res.png" alt="factual-logo" title="Factual"></li>
 <li><a href="https://github.com/alexrobbins/cascalog-intro">https://github.com/alexrobbins/cascalog-intro</a></li>
 </ul>
 
