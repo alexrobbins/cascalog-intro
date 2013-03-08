@@ -329,7 +329,7 @@ row. Picturing the rest of the members as ghosts over to the side might be helpf
     (likes y x)))
 
 ;; output:
-()
+(["Captain Hammer" "Captain Hammer"])
 ```
 
 ---
@@ -422,10 +422,10 @@ Penny            bystander
 
 ```
 (def people [
- ["Dr."      "Horrible" :villain  ]
- ["Bad"      "Horse"    :villain  ]
- ["Captain"  "Hammer"   :hero     ]
- ["Penny"    ""         :bystander]])
+ ["Dr. Horrible"   :villain  ]
+ ["Bad Horse"      :villain  ]
+ ["Captain Hammer" :hero     ]
+ ["Penny"          :bystander]])
 
 (def likes [
  ["Dr. Horrible"   "Penny"         ]
@@ -477,7 +477,7 @@ Painless join across three sources!
 
 Nathan Marz (and others) for Cascalog
 
-Rich Hickie for Clojure
+Rich Hickey for Clojure
 
 Alex Miller for Clojure/West
 
@@ -495,3 +495,24 @@ Alex Robbins
 Factual is hiring!
 
 [factual-logo]: images/factual-high-res.png "Factual"
+
+
+---
+
+# TODO
+
+Fix code in presentation
+Left joins, right joins, cross-join
+Description of the domain. WHy would you be evaluating pig, cascalog, etc.
+Why Factual uses Cascalog? How do we benefit from it.
+Rough pro-con chart.
+Mention some other competitors (Hive)
+Reference later talks
+Make sure Cascalog and core.logic are clearly disparate
+Parallelags, combiners
+Arbitrary Clojure code can intermingle with the Cascalog code
+Cascading website has a hadoop abstraction comparison graphic
+Serialization support in Cascalog
+Investigate Clojure on Hadoop
+Talk more about taps and how useful they are
+Put the java code and the clojure next to each other
