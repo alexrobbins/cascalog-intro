@@ -289,7 +289,6 @@ row. Picturing the rest of the members as ghosts over to the side might be helpf
 ---
 
 # Logic Variables
-## For Non-Physicists
 
 ```
 (defrel person name)
@@ -301,7 +300,7 @@ row. Picturing the rest of the members as ghosts over to the side might be helpf
   (person variable))
 
 ;; output:
-("Dr. Horrible" "Penny" "Captain Hammer")
+("Captain Hammer" "Penny" "Dr. Horrible")
 ```
 
 ---
@@ -453,14 +452,14 @@ Painless join across three sources!
 
 ```
 (def people [
- ["Dr."      "Horrible" :villain  ]
- ["Bad"      "Horse"    :villain  ]
- ["Captain"  "Hammer"   :hero     ]
- ["Penny"    ""         :bystander]])
+ ["Dr. Horrible"   :villain  ]
+ ["Bad Horse"      :villain  ]
+ ["Captain Hammer" :hero     ]
+ ["Penny"          :bystander]])
 
 ; How many of each role are there?
 (??<- [?role ?count]
-  (people _ _ ?role)
+  (people _ ?role)
   (cascalog.ops/count ?count))
 
 ;output
@@ -501,7 +500,6 @@ Factual is hiring!
 
 # TODO
 
-Fix code in presentation
 Left joins, right joins, cross-join
 Description of the domain. WHy would you be evaluating pig, cascalog, etc.
 Why Factual uses Cascalog? How do we benefit from it.
