@@ -125,11 +125,10 @@ A great fit for people who love SQL, and wish they could use it for everything.
 
 <!--- Notes:
 Disclaimer: I've never used Pig myself.
-Pig allows you to write SQL-like commands that are run over the cluster. A
-possible limitation is that Pig is its own programming language, so you can't
-import functionality from third-party packages the way you would in Hadoop (java)
-or Cascalog (Clojure or Java).
-Some people really like it. I haven't used it.
+Pig allows you to write SQL-like commands that are run over the cluster. If you
+want to add functionality to a Pig query, you write a "User Defined Function."
+As your needs get more and more specialized, you end up writing many UDFs, all
+in Java.
 --->
 
 ---
@@ -157,6 +156,25 @@ STORE ordered_word_count INTO '/tmp/number-of-words-on-internet';
 -- http://en.wikipedia.org/wiki/Pig_(programming_tool)
 ```
 
+---
+
+# Hive
+
+TODO - Summary sentence
+
+---
+
+TODO Hive word count code sample
+
+---
+
+# clojure-hadoop
+
+TODO - Summary sentence
+
+---
+
+TODO clojure-hadoop code sample?
 
 ---
 
@@ -196,6 +214,100 @@ Weaknesses: lots of magic, forces a restricted subset of clojure (no lambdas),
 
 ;; https://github.com/sritchie/cascalog-class/blob/master/src/cascalog_class/core.clj
 ```
+
+---
+
+
+```Left-java-code
+package org.myorg;
+
+import java.io.IOException;
+import java.util.*;
+
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.conf.*;
+import org.apache.hadoop.io.*;
+import org.apache.hadoop.mapreduce.*;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+
+public class WordCount {
+
+  public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
+    private final static IntWritable one = new IntWritable(1);
+    private Text word = new Text();
+
+    public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+      String line = value.toString();
+      StringTokenizer tokenizer = new StringTokenizer(line);
+      while (tokenizer.hasMoreTokens()) {
+        word.set(tokenizer.nextToken());
+        context.write(word, one);
+      }
+    }
+  }
+
+  public static class Reduce extends Reducer<Text, IntWritable, Text, IntWritable> {
+
+    public void reduce(Text key, Iterable<IntWritable> values, Context context)
+      throws IOException, InterruptedException {
+      int sum = 0;
+      for (IntWritable val : values) {
+        sum += val.get();
+      }
+      context.write(key, new IntWritable(sum));
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Configuration conf = new Configuration();
+    Job job = new Job(conf, "wordcount");
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(IntWritable.class);
+    job.setMapperClass(Map.class);
+    job.setReducerClass(Reduce.class);
+    job.setInputFormatClass(TextInputFormat.class);
+    job.setOutputFormatClass(TextOutputFormat.class);
+    FileInputFormat.addInputPath(job, new Path(args[0]));
+    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+    job.waitForCompletion(true);
+  }
+
+}
+
+// http://wiki.apache.org/hadoop/WordCount
+```
+
+```Right-clojure-code
+(ns cascalog-class.core
+  (:require [cascalog.api :refer :all]
+            [cascalog.ops :as c]))
+
+(defmapcatop split
+  "Accepts a sentence 1-tuple, splits that sentence on whitespace, and
+  emits a single 1-tuple for each word."
+  [^String sentence]
+  (.split sentence "\\s+"))
+
+(def -main
+  "Accepts a generator of lines of text and returns a subquery that
+  generates a count for each word in the text sample."
+  (?<- (stdout)
+    [?word ?count]
+    ((hfs-textline "input-dir") ?textline)
+    (split ?textline :> ?word)
+    (c/count ?count)))
+
+;; https://github.com/sritchie/cascalog-class/blob/master/src/cascalog_class/core.clj
+```
+
+---
+
+# Comparison Chart
+
+TODO
 
 ---
 
@@ -386,6 +498,21 @@ Penny            bystander
 
 ---
 
+# Taps TODO
+
+- lfs-textline
+- hfs-textline
+- hfs-seqfile
+- other
+
+---
+
+# Defining/Executing Queries
+
+TODO
+
+---
+
 # Operations
 
 ```
@@ -448,6 +575,12 @@ Painless join across three sources!
 
 ---
 
+# Outer Joins (Nullable variables)
+
+TODO
+
+---
+
 # Aggregators
 
 ```
@@ -468,7 +601,29 @@ Painless join across three sources!
 
 ---
 
+# Complex aggregators? (Combiners, parallelags)
+
+TODO
+
+---
+
+# Demonstrate value of serialization support
+
+TODO
+
+---
+
 # Demo
+
+---
+
+Please don't take any of the conclusions from the demo seriously.
+
+---
+
+# Cascalog at Factual
+
+TODO
 
 ---
 
@@ -494,23 +649,3 @@ Alex Robbins
 Factual is hiring!
 
 [factual-logo]: images/factual-high-res.png "Factual"
-
-
----
-
-# TODO
-
-Left joins, right joins, cross-join
-Description of the domain. WHy would you be evaluating pig, cascalog, etc.
-Why Factual uses Cascalog? How do we benefit from it.
-Rough pro-con chart.
-Mention some other competitors (Hive)
-Reference later talks
-Make sure Cascalog and core.logic are clearly disparate
-Parallelags, combiners
-Arbitrary Clojure code can intermingle with the Cascalog code
-Cascading website has a hadoop abstraction comparison graphic
-Serialization support in Cascalog
-Investigate Clojure on Hadoop
-Talk more about taps and how useful they are
-Put the java code and the clojure next to each other
