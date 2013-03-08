@@ -189,6 +189,20 @@ code.Java {
   line-height: 12px;
 }
 
+code.Left-java-code {
+  float:left;
+  width: 45%;
+  font-size: 8px;
+  line-height: 9px;
+}
+
+code.Right-clojure-code {
+  float: right;
+  width: 45%;
+  font-size: 8px;
+  line-height: 9px;
+}
+
 .present .positioning {
   -webkit-transform: translateY(-10px);
   -moz-transform: translateY(-10px);

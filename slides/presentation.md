@@ -239,7 +239,8 @@ public class WordCount {
     private final static IntWritable one = new IntWritable(1);
     private Text word = new Text();
 
-    public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+    public void map(LongWritable key, Text value, Context context)
+      throws IOException, InterruptedException {
       String line = value.toString();
       StringTokenizer tokenizer = new StringTokenizer(line);
       while (tokenizer.hasMoreTokens()) {
@@ -286,14 +287,10 @@ public class WordCount {
             [cascalog.ops :as c]))
 
 (defmapcatop split
-  "Accepts a sentence 1-tuple, splits that sentence on whitespace, and
-  emits a single 1-tuple for each word."
   [^String sentence]
   (.split sentence "\\s+"))
 
 (def -main
-  "Accepts a generator of lines of text and returns a subquery that
-  generates a count for each word in the text sample."
   (?<- (stdout)
     [?word ?count]
     ((hfs-textline "input-dir") ?textline)
@@ -302,6 +299,11 @@ public class WordCount {
 
 ;; https://github.com/sritchie/cascalog-class/blob/master/src/cascalog_class/core.clj
 ```
+
+<div style="clear: both">&nbsp;</div>
+Cascalog: 311 characters
+
+Hadoop:  1950 characters (6x more)
 
 ---
 
