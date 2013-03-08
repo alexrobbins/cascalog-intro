@@ -13,10 +13,6 @@ some cool tech, we each already have a list of things we'd like to check out
 that is longer than we'll ever get to. It is my hope that this talk will help
 you decide whether or not Cascalog is worth the time it'll take you to
 understand it.
-Being cool isn't enough to earn a spot in most of our busy schedules. It is
-my hope that by the end of this talk, you'll have a better idea of how
-Cascalog can help you accomplish things faster and more easily, all while having
-fun with some cool tech.
 --->
 
 ---
@@ -37,7 +33,7 @@ pass those chunks around a computing cluster of dozens or hundreds of servers.
 <!--- Notes:
 Cascalog is not the only distributed computing framework. Actually, it is built
 on top of one of its biggest competitors, Hadoop. Other packages currently
-solving this problem include Pig, Hive and Riak, among others. The different
+solving this problem include Pig, Hive and Riak, just to name a few. The different
 packages embrace different abstractions, as well as different levels of
 abstraction.
 --->
@@ -51,7 +47,7 @@ Perfect for anyone who thinks in Map/Reduce, and likes typing.
 <!--- Notes:
 Hadoop is the current dominant force in the world of distributed computing.
 Most of its competitors are built on top of it, and reuse pieces of it, such as
-HDFS, its distributed file system. Hadoop provides low level control over your
+HDFS, Hadoop's distributed file system. Hadoop provides low level control over your
 jobs, with the normal tradeoffs for low level programming. Writing compute jobs
 in hadoop requires a fair amount of boilerplate, with even very simple tasks
 taking more than 50 lines of code. At the same time, Hadoop works.
@@ -172,7 +168,8 @@ The power of logic programming and Clojure, combined with a lot of magic.
 Obviously, we'll be talking about Cascalog for the rest of the talk, so I don't
 want to give it all away now. The high level strengths and weaknesses are:
 Strengths: concise, easily extensible, Clojure!
-Weaknesses: lots of magic, forces a restricted subset of clojure (no lambdas)
+Weaknesses: lots of magic, forces a restricted subset of clojure (no lambdas),
+  cryptic error messages
 --->
 
 ---
@@ -209,7 +206,7 @@ Weaknesses: lots of magic, forces a restricted subset of clojure (no lambdas)
 <!--- Notes:
 Unfortunately, over the next several slides I'll be defining terms by using other
 terms that you likely don't know. However, I promise to cover those terms in
-later slides.
+even later slides.
 
 In this case, the question is, "What is Cascalog?" The answer is, "Cascalog is a
 combination of Cascading and Datalog." An answer that is technically correct
