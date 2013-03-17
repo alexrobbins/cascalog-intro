@@ -121,11 +121,12 @@ public class WordCount {
 
 # Pig
 
-A great fit for people who love SQL, and wish they could use it for everything.
+Because everyone wants to learn another programming language.
+
 
 <!--- Notes:
 Disclaimer: I've never used Pig myself.
-Pig allows you to write SQL-like commands that are run over the cluster. If you
+Pig allows you to write commands in pig-latin that are run over the cluster. If you
 want to add functionality to a Pig query, you write a "User Defined Function."
 As your needs get more and more specialized, you end up writing many UDFs, all
 in Java.
@@ -160,21 +161,22 @@ STORE ordered_word_count INTO '/tmp/number-of-words-on-internet';
 
 # Hive
 
-TODO - Summary sentence
+A great fit for people who love SQL, and wish they could use it for everything.
 
 ---
 
-TODO Hive word count code sample
+```
+CREATE TABLE docs(contents STRING);
+FROM
 
----
+(MAP docs.contents USING 'tokenizer_script' AS word, cnt
+FROM docs
+CLUSTER BY word) map_output
 
-# clojure-hadoop
+REDUCE map_output.word, map_output.cnt USING 'count_script' AS word, cnt;
 
-TODO - Summary sentence
-
----
-
-TODO clojure-hadoop code sample?
+;; Note that you have to provide your own tokenizer and counter, in whatever language you want.
+```
 
 ---
 
@@ -304,12 +306,6 @@ public class WordCount {
 Cascalog: 311 characters
 
 Hadoop:  1950 characters (6x more)
-
----
-
-# Comparison Chart
-
-TODO
 
 ---
 
@@ -478,7 +474,7 @@ Vector source:
  [ "Penny"    ""         :bystander ]])
 ```
 
-TSV source:
+TSV source (using a tap):
 
 ```
 Dr.     Horrible villain
@@ -500,18 +496,49 @@ Penny            bystander
 
 ---
 
-# Taps TODO
+# Taps
 
 - lfs-textline
-- hfs-textline
-- hfs-seqfile
-- other
+
+```
+((lfs-textline "/home/alexr/resolve-ml/inputs") ?input-line)
+```
+
+- hfs-textline - Read (or write) inputs from HDFS
+- hfs-seqfile - Read (or write) hadoop seqfiles
+
+You can write:
+
+- Taps that read/write JSON
+- Taps that read/write protobufs
 
 ---
 
-# Defining/Executing Queries
+# Queries
 
-TODO
+Define a query.
+
+```
+(def query
+  (<- [?name ?age]
+    (people ?name ?age)
+    (< ?age 40)))
+```
+
+Execute the query.
+
+```
+(?- (lfs-textline "/home/alexr/output-path")
+  query)
+```
+
+Define and execute the query.
+
+```
+(??<- [?name ?age]
+  (people ?name ?age)
+  (< ?age 40))
+```
 
 ---
 
@@ -577,12 +604,6 @@ Painless join across three sources!
 
 ---
 
-# Outer Joins (Nullable variables)
-
-TODO
-
----
-
 # Aggregators
 
 ```
@@ -603,18 +624,6 @@ TODO
 
 ---
 
-# Complex aggregators? (Combiners, parallelags)
-
-TODO
-
----
-
-# Demonstrate value of serialization support
-
-TODO
-
----
-
 # Demo
 
 ---
@@ -624,8 +633,6 @@ Please don't take any of the conclusions from the demo seriously.
 ---
 
 # Cascalog at Factual
-
-TODO
 
 ---
 
