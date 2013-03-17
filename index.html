@@ -147,15 +147,14 @@ public class WordCount {
     
 <h1>Pig</h1>
 
-<p>A great fit for people who love SQL, and wish they could use it for everything.</p>
+<p>Because everyone wants to learn another programming language.</p>
 
 <!--- Notes:
 Disclaimer: I've never used Pig myself.
-Pig allows you to write SQL-like commands that are run over the cluster. A
-possible limitation is that Pig is its own programming language, so you can't
-import functionality from third-party packages the way you would in Hadoop (java)
-or Cascalog (Clojure or Java).
-Some people really like it. I haven't used it.
+Pig allows you to write commands in pig-latin that are run over the cluster. If you
+want to add functionality to a Pig query, you write a "User Defined Function."
+As your needs get more and more specialized, you end up writing many UDFs, all
+in Java.
 --->
 </div>
       <div class='step' >
@@ -179,6 +178,24 @@ ordered_word_count = ORDER word_count BY count DESC;
 STORE ordered_word_count INTO '/tmp/number-of-words-on-internet';
 
 -- http://en.wikipedia.org/wiki/Pig_(programming_tool)
+</code></pre></div>
+      <div class='step' >
+    
+<h1>Hive</h1>
+
+<p>A great fit for people who love SQL, and wish they could use it for everything.</p>
+</div>
+      <div class='step' >
+    <pre><code class='prettyprint '>CREATE TABLE docs(contents STRING);
+FROM
+
+(MAP docs.contents USING 'tokenizer_script' AS word, cnt
+FROM docs
+CLUSTER BY word) map_output
+
+REDUCE map_output.word, map_output.cnt USING 'count_script' AS word, cnt;
+
+;; Note that you have to provide your own tokenizer and counter, in whatever language you want.
 </code></pre></div>
       <div class='step' >
     
@@ -216,6 +233,90 @@ Weaknesses: lots of magic, forces a restricted subset of clojure (no lambdas),
 
 ;; https://github.com/sritchie/cascalog-class/blob/master/src/cascalog_class/core.clj
 </code></pre></div>
+      <div class='step' >
+    <pre><code class='prettyprint Left-java-code'>package org.myorg;
+
+import java.io.IOException;
+import java.util.*;
+
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.conf.*;
+import org.apache.hadoop.io.*;
+import org.apache.hadoop.mapreduce.*;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+
+public class WordCount {
+
+  public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
+    private final static IntWritable one = new IntWritable(1);
+    private Text word = new Text();
+
+    public void map(LongWritable key, Text value, Context context)
+      throws IOException, InterruptedException {
+      String line = value.toString();
+      StringTokenizer tokenizer = new StringTokenizer(line);
+      while (tokenizer.hasMoreTokens()) {
+        word.set(tokenizer.nextToken());
+        context.write(word, one);
+      }
+    }
+  }
+
+  public static class Reduce extends Reducer<Text, IntWritable, Text, IntWritable> {
+
+    public void reduce(Text key, Iterable<IntWritable> values, Context context)
+      throws IOException, InterruptedException {
+      int sum = 0;
+      for (IntWritable val : values) {
+        sum += val.get();
+      }
+      context.write(key, new IntWritable(sum));
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Configuration conf = new Configuration();
+    Job job = new Job(conf, "wordcount");
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(IntWritable.class);
+    job.setMapperClass(Map.class);
+    job.setReducerClass(Reduce.class);
+    job.setInputFormatClass(TextInputFormat.class);
+    job.setOutputFormatClass(TextOutputFormat.class);
+    FileInputFormat.addInputPath(job, new Path(args[0]));
+    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+    job.waitForCompletion(true);
+  }
+
+}
+
+// http://wiki.apache.org/hadoop/WordCount
+</code></pre><pre><code class='prettyprint Right-clojure-code'>(ns cascalog-class.core
+  (:require [cascalog.api :refer :all]
+            [cascalog.ops :as c]))
+
+(defmapcatop split
+  [^String sentence]
+  (.split sentence "\\s+"))
+
+(def -main
+  (?<- (stdout)
+    [?word ?count]
+    ((hfs-textline "input-dir") ?textline)
+    (split ?textline :> ?word)
+    (c/count ?count)))
+
+;; https://github.com/sritchie/cascalog-class/blob/master/src/cascalog_class/core.clj
+</code></pre>
+<div style="clear: both">&nbsp;</div>
+
+<p>Cascalog: 311 characters</p>
+
+<p>Hadoop:  1950 characters (6x more)</p>
+</div>
       <div class='step' >
     
 <h1>What is Cascalog?</h1>
@@ -311,8 +412,6 @@ row. Picturing the rest of the members as ghosts over to the side might be helpf
       <div class='step' >
     
 <h1>Logic Variables</h1>
-
-<h2>For Non-Physicists</h2>
 <pre><code class='prettyprint '>(defrel person name)
 (fact person "Dr. Horrible")
 (fact person "Penny")
@@ -322,7 +421,7 @@ row. Picturing the rest of the members as ghosts over to the side might be helpf
   (person variable))
 
 ;; output:
-("Dr. Horrible" "Penny" "Captain Hammer")
+("Captain Hammer" "Penny" "Dr. Horrible")
 </code></pre></div>
       <div class='step' >
     
@@ -347,7 +446,7 @@ row. Picturing the rest of the members as ghosts over to the side might be helpf
     (likes y x)))
 
 ;; output:
-()
+(["Captain Hammer" "Captain Hammer"])
 </code></pre></div>
       <div class='step' >
     
@@ -384,7 +483,7 @@ programming paradigm, you won't be able to copy code from one to the other.
  [ "Captain"  "Hammer"   :hero      ]
  [ "Penny"    ""         :bystander ]])
 </code></pre>
-<p>TSV source:</p>
+<p>TSV source (using a tap):</p>
 <pre><code class='prettyprint '>Dr.     Horrible villain
 Bad     Horse    villain
 Captain Hammer   hero
@@ -397,6 +496,46 @@ Penny            bystander
   (<- [?fname ?lname ?role]
     (lfs-textline "people.tsv" ?line)
     (split ?line :> ?fname ?lname ?role)))
+</code></pre></div>
+      <div class='step' >
+    
+<h1>Taps</h1>
+
+<ul>
+<li>lfs-textline</li>
+</ul>
+<pre><code class='prettyprint '>((lfs-textline "/home/alexr/resolve-ml/inputs") ?input-line)
+</code></pre>
+<ul>
+<li>hfs-textline - Read (or write) inputs from HDFS</li>
+<li>hfs-seqfile - Read (or write) hadoop seqfiles</li>
+</ul>
+
+<p>You can write:</p>
+
+<ul>
+<li>Taps that read/write JSON</li>
+<li>Taps that read/write protobufs</li>
+</ul>
+</div>
+      <div class='step' >
+    
+<h1>Queries</h1>
+
+<p>Define a query.</p>
+<pre><code class='prettyprint '>(def query
+  (<- [?name ?age]
+    (people ?name ?age)
+    (< ?age 40)))
+</code></pre>
+<p>Execute the query.</p>
+<pre><code class='prettyprint '>(?- (lfs-textline "/home/alexr/output-path")
+  query)
+</code></pre>
+<p>Define and execute the query.</p>
+<pre><code class='prettyprint '>(??<- [?name ?age]
+  (people ?name ?age)
+  (< ?age 40))
 </code></pre></div>
       <div class='step' >
     
@@ -430,10 +569,10 @@ Penny            bystander
     
 <h1>Joins</h1>
 <pre><code class='prettyprint '>(def people [
- ["Dr."      "Horrible" :villain  ]
- ["Bad"      "Horse"    :villain  ]
- ["Captain"  "Hammer"   :hero     ]
- ["Penny"    ""         :bystander]])
+ ["Dr. Horrible"   :villain  ]
+ ["Bad Horse"      :villain  ]
+ ["Captain Hammer" :hero     ]
+ ["Penny"          :bystander]])
 
 (def likes [
  ["Dr. Horrible"   "Penny"         ]
@@ -458,14 +597,14 @@ Penny            bystander
     
 <h1>Aggregators</h1>
 <pre><code class='prettyprint '>(def people [
- ["Dr."      "Horrible" :villain  ]
- ["Bad"      "Horse"    :villain  ]
- ["Captain"  "Hammer"   :hero     ]
- ["Penny"    ""         :bystander]])
+ ["Dr. Horrible"   :villain  ]
+ ["Bad Horse"      :villain  ]
+ ["Captain Hammer" :hero     ]
+ ["Penny"          :bystander]])
 
 ; How many of each role are there?
 (??<- [?role ?count]
-  (people _ _ ?role)
+  (people _ ?role)
   (cascalog.ops/count ?count))
 
 ;output
@@ -477,11 +616,19 @@ Penny            bystander
 </div>
       <div class='step' >
     
+<p>Please don&#39;t take any of the conclusions from the demo seriously.</p>
+</div>
+      <div class='step' >
+    
+<h1>Cascalog at Factual</h1>
+</div>
+      <div class='step' >
+    
 <h1>Thanks</h1>
 
 <p>Nathan Marz (and others) for Cascalog</p>
 
-<p>Rich Hickie for Clojure</p>
+<p>Rich Hickey for Clojure</p>
 
 <p>Alex Miller for Clojure/West</p>
 </div>
