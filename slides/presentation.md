@@ -498,12 +498,7 @@ Penny            bystander
 
 # Taps
 
-- lfs-textline
-
-```
-((lfs-textline "/home/alexr/resolve-ml/inputs") ?input-line)
-```
-
+- lfs-textline - Read (or write) local files
 - hfs-textline - Read (or write) inputs from HDFS
 - hfs-seqfile - Read (or write) hadoop seqfiles
 
