@@ -490,7 +490,7 @@ Penny            bystander
 
 (def people
   (<- [?fname ?lname ?role]
-    (lfs-textline "people.tsv" ?line)
+    ((lfs-textline "people.tsv") ?line)
     (split ?line :> ?fname ?lname ?role)))
 ```
 
