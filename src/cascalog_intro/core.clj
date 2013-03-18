@@ -3,7 +3,7 @@
             [cascalog.ops :as c]
             [clojure.string :as s]
             [cascalog-intro.stopwords :refer (stopwords)]))
-;; This file is used for the live demo, so it is organized temporally, top to bottom.
+; This file is used for the live demo, so it is organized temporally, top to bottom.
 
 
 
@@ -30,7 +30,7 @@
 
 ;; Let's start with word counts for one talk, just to get started
 
-;; First we need a tuple source.
+; First we need a tuple source.
 
 (comment
   (??<- [?line] ((lfs-textline "data/one-talk.txt") ?line))
@@ -83,7 +83,7 @@
 (defmapcatop description->words [description]
   (re-seq #"[A-Za-z0-9']+" description))
 
-;; Splitting into words, then counting them.
+; Splitting into words, then counting them.
 (comment
   (??<- [?word ?count]
           (one-talk-tap _ _ ?description)
@@ -311,3 +311,14 @@
         (c/limit [10] ?word ?count :> ?top-word ?top-count))
 
   )
+
+
+
+
+
+
+
+
+
+
+;; END
